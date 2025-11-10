@@ -1,12 +1,11 @@
 import 'dart:convert';
 
-import 'package:v04/models/hero_id_factory.dart';
+import 'package:v04/id/hero_id_factory.dart';
 
 class HeroModel extends ToJson implements Comparable<HeroModel> {
 
   static HeroIdFactory idFactory = HeroIdFactoryImpl();
 
-  String response;
   int id;
   String name;
   Powerstats powerstats;
@@ -16,11 +15,11 @@ class HeroModel extends ToJson implements Comparable<HeroModel> {
   Connections connections;
   Image image;
 
-  HeroModel(this.response, this.id, this.name, this.powerstats, this.biography,
+  HeroModel(this.id, this.name, this.powerstats, this.biography,
       this.appearance, this.work, this.connections, this.image);
 
-  static HeroModel simpelHeroModel(name, strength, alignment) {
-    return HeroModel("NA",
+  factory HeroModel.simpelHeroModel(String name, int strength, String alignment) {
+    return HeroModel(
         idFactory.getNewId(),
         name,
         Powerstats(0, strength, 0, 0, 0, 0),
@@ -33,7 +32,6 @@ class HeroModel extends ToJson implements Comparable<HeroModel> {
 
   factory HeroModel.fromJson(Map<String, dynamic> json) {
     return HeroModel(
-        json['response'],
         int.parse(json['id']),
         json['name'],
         Powerstats.fromJson(json['powerstats']),
@@ -49,8 +47,8 @@ class HeroModel extends ToJson implements Comparable<HeroModel> {
     return HeroModel.fromJson(jsonDecode(json));
   }
 
+  @override
   Map<String, dynamic> toJson() => {
-    'response': response,
     'id': id.toString(),
     'name': name,
     'powerstats': powerstats.toJson(),
@@ -61,6 +59,7 @@ class HeroModel extends ToJson implements Comparable<HeroModel> {
     'image': image.toJson()
   };
 
+  @override
   String toJsonString() {
     return jsonEncode(toJson());
   }
@@ -119,6 +118,7 @@ class Powerstats extends ToJson {
     return Powerstats.fromJson(jsonDecode(json));
   }
 
+  @override
   Map<String, dynamic> toJson() => {
     'intelligence': intelligence.toString(),
     'strength': strength.toString(),
@@ -131,6 +131,9 @@ class Powerstats extends ToJson {
 }
 
 class Biography extends ToJson {
+
+  static const String good = 'good';
+  static const String bad = 'bad';
 
   String fullName;
   String alterEgos;
@@ -159,6 +162,7 @@ class Biography extends ToJson {
     return Biography.fromJson(jsonDecode(json));
   }
 
+  @override
   Map<String, dynamic> toJson() => {
     'full-name': fullName,
     'alter-egos': alterEgos,
@@ -224,6 +228,7 @@ class Work extends ToJson {
     return Work.fromJson(jsonDecode(json));
   }
 
+  @override
   Map<String, dynamic> toJson() => {
     'occupation': occupation,
     'base': base
@@ -246,6 +251,7 @@ class Connections extends ToJson {
     return Connections.fromJson(jsonDecode(json));
   }
 
+  @override
   Map<String, dynamic> toJson() => {
     'group-affiliation': groupAffiliation,
     'relatives': relatives
@@ -267,6 +273,7 @@ class Image extends ToJson {
     return Image.fromJson(jsonDecode(json));
   }
 
+  @override
   Map<String, dynamic> toJson() => {
     'url': url
   };
