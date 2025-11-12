@@ -5,6 +5,72 @@ import '../testdata/json_test_data.dart';
 
 void main() {
 
+  test('heroWithNulls', () {
+    HeroModel hero = HeroModel(1, 'Nisse', null, null, null, null, null, null);
+    String expectedJson = '{"id":"1","name":"Nisse"}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithEmptySubObjects', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, null, null, null, null, null),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithAlignment', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, null, null, null, null, Biography.bad),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{"alignment":"${Biography.bad}"},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithEmptyAliases', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, [], null, null, null, null),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{"aliases":[]},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithOneAliases', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, ['dude'], null, null, null, null),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{"aliases":["dude"]},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithTwoAliases', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, ['dude', 'sucker'], null, null, null, null),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{"aliases":["dude","sucker"]},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
   test('HeroModel', () {
     String json = TestHeros.Batman;
 
@@ -28,12 +94,12 @@ void main() {
 
     Powerstats parsed = Powerstats.fromJsonString(json);
 
-    expect(parsed.intelligence, 100);
-    expect(parsed.strength, 26);
-    expect(parsed.speed, 27);
-    expect(parsed.durability, 50);
-    expect(parsed.power, 47);
-    expect(parsed.combat, 100);
+    expect(parsed.intelligence, "100");
+    expect(parsed.strength, "26");
+    expect(parsed.speed, "27");
+    expect(parsed.durability, "50");
+    expect(parsed.power, "47");
+    expect(parsed.combat, "100");
 
     verifyJson(parsed.toJsonString(), json);
   });
@@ -167,6 +233,13 @@ void verifyJson(String actual, String expected) {
   String expectedClean = expected.replaceAll(RegExp(r'\s+'), '');
   String actualClean = actual.replaceAll(RegExp(r'\s+'), '');
   expect(actualClean, expectedClean);
+}
+
+void verifyHero(HeroModel hero, String expectedJson) {
+  String actualJson = hero.toJsonString();
+  verifyJson(actualJson, expectedJson);
+  String fromJsonString = HeroModel.fromJsonString(expectedJson).toJsonString();
+  verifyJson(fromJsonString, expectedJson);
 }
 
 HeroModel getNext(Iterator<HeroModel> heroesIterator) {

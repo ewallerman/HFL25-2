@@ -7,7 +7,7 @@ class Util {
       stdout.write(inputLabel);
       String? readArg = stdin.readLineSync();
 
-      if (readArg != null && readArg.trim().length != 0) {
+      if (readArg != null && readArg.trim().isNotEmpty) {
         return readArg.trim();
       }
 
@@ -31,7 +31,7 @@ class Util {
       stdout.write(inputLabel);
       String? readArg = stdin.readLineSync();
 
-      if (readArg != null && readArg.trim().length != 0) {
+      if (readArg != null && readArg.trim().isNotEmpty) {
         String arg = readArg.trim();
 
         if (possibleChoices.contains(arg)) {

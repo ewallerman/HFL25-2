@@ -33,6 +33,11 @@ class InMemStorage implements CachedStorage {
   }
 
   @override
+  HeroModel? getHero(int id) {
+    return _cachedHeroes.where((HeroModel hero) => hero.id == id).firstOrNull;
+  }
+
+  @override
   List<HeroModel> getHeroes() {
     return _cachedHeroes;
   }
@@ -58,12 +63,20 @@ class InMemStorage implements CachedStorage {
 
   @override
   List<HeroModel> getGoodHeroes() {
-    return _cachedHeroes.where((HeroModel hero) => hero.biography.alignment == Biography.good).toList();
+    return getHeroesWithAlignment(Biography.good);
   }
 
   @override
   List<HeroModel> getBadHeroes() {
-    return _cachedHeroes.where((HeroModel hero) => hero.biography.alignment == Biography.bad).toList();
+    return getHeroesWithAlignment(Biography.bad);
+  }
+
+  List<HeroModel> getHeroesWithAlignment(String alignment) {
+    return _cachedHeroes.where((HeroModel hero) =>
+      hero.biography != null
+        && hero.biography!.alignment != null
+        && hero.biography!.alignment! == alignment
+    ).toList();
   }
 
   @override

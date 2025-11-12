@@ -40,6 +40,7 @@ class HeroDex3000 {
 
     switch (alt) {
       case Alternative.add: addHero();
+      case Alternative.printHero: printHero();
       case Alternative.delete: deleteHero();
       case Alternative.deleteAll: deleteAllHeroes();
       case Alternative.list: listHeroes();
@@ -73,12 +74,24 @@ class HeroDex3000 {
   }
 
   void addHero() {
-    print("");
+    print("\n-- Add Hero --");
     String name = Util.readString("Name: ");
     int strength = Util.readPositiveInt("Strength: ");
-    String alignment = Util.readSpecificString("Alignment(good/bad): ", ["good", "bad"]);
+    String alignment = Util.readSpecificString("Alignment(${Biography.good}/${Biography.bad}): ", [Biography.good, Biography.bad]);
     HeroModel hero = HeroModel.simpelHeroModel(name, strength, alignment);
     _heroes.add(hero);
+  }
+
+  void printHero() {
+    print("\n-- Print Hero --");
+    int id = Util.readPositiveInt("Id: ");
+    HeroModel? hero = _heroes.getHero(id);
+
+    if (hero == null) {
+      print("\nNo hero for id: $id found");
+    } else {
+      hero.prettyPrintHero();
+    }
   }
 
   void deleteHero() {
@@ -94,17 +107,23 @@ class HeroDex3000 {
 
   void listHeroes() {
     print("\n-- List Heroes --");
-    printHeroes(_heroes.getHeroes());
+    List<HeroModel> heroes = _heroes.getHeroes();
+    printHeroes(heroes);
+    print("\n${heroes.length} Heroes found.");
   }
 
   void listGoodHeroes() {
     print("\n-- List Good Heroes --");
-    printHeroes(_heroes.getGoodHeroes());
+    List<HeroModel> heroes = _heroes.getGoodHeroes();
+    printHeroes(heroes);
+    print("\n${heroes.length} Good Heroes found.");
   }
 
   void listBadHeroes() {
     print("\n-- List Bad Heroes --");
-    printHeroes(_heroes.getBadHeroes());
+    List<HeroModel> heroes = _heroes.getBadHeroes();
+    printHeroes(heroes);
+    print("\n${heroes.length} Bad Heroes found.");
   }
 
   void listTopHeroes() {
@@ -120,12 +139,13 @@ class HeroDex3000 {
   void searchHeroes() {
     print("\n-- Search Heroes --");
     String search = Util.readString("\nSearch: ");
-    List<HeroModel> searchResult = _heroes.searchHero(search);
+    List<HeroModel> heroes = _heroes.searchHero(search);
 
-    if (searchResult.isEmpty) {
+    if (heroes.isEmpty) {
       print("\nNo Heroes found.");
     } else {
-      printHeroes(searchResult);
+      printHeroes(heroes);
+      print("\n${heroes.length} Heroes found.");
     }
   }
 
@@ -137,8 +157,8 @@ class HeroDex3000 {
     if (searchResult.isEmpty) {
       print("\nNo new Heroes found.");
     } else {
-      print("\nHeroes found and added to local herodex.");
       printHeroes(searchResult);
+      print("\n${searchResult.length} Heroes found and added to local herodex.");
     }
   }
 
@@ -152,6 +172,7 @@ class HeroDex3000 {
 enum Alternative {
 
   add('Add Hero'),
+  printHero('Print Hero'),
   delete('Delete Hero'),
   deleteAll('Delete All Heroes'),
   list('List Heroes'),

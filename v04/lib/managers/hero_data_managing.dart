@@ -12,6 +12,8 @@ abstract class HeroDataManaging {
 
   void deleteAllHeroes();
 
+  HeroModel? getHero(int id);
+
   List<HeroModel> getHeroes();
 
   List<HeroModel> getGoodHeroes();

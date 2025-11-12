@@ -10,7 +10,7 @@ void main() {
   test('searchBatman', () async {
     HttpStorage httpStorage = HttpStorage(HttpStorage.defaultUrl, EnvSecretFetcher.fetchApiKey());
 
-    List<HeroModel> heroes = await httpStorage.searchHero('KalleKula');//('Batman');
+    List<HeroModel> heroes = await httpStorage.searchHero('Batman');
 
     expect(heroes.length, 3);
   });

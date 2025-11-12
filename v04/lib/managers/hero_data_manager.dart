@@ -42,6 +42,11 @@ class HeroDataManager implements HeroDataManaging {
   }
 
   @override
+  HeroModel? getHero(int id) {
+    return _cachedHeroes.getHero(id);
+  }
+
+  @override
   List<HeroModel> getHeroes() {
     return _cachedHeroes.getHeroes();
   }

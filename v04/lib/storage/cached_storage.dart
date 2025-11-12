@@ -12,6 +12,8 @@ abstract class CachedStorage {
 
   void deleteAllHeroes();
 
+  HeroModel? getHero(int id);
+
   List<HeroModel> getHeroes();
 
   List<HeroModel> getTopHeroes(int nrOfTopHeroes);
