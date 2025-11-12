@@ -1,62 +1,78 @@
 import 'package:test/test.dart';
 import 'package:v04/models/hero_model.dart';
 
+import '../testdata/json_test_data.dart';
+
 void main() {
 
+  test('heroWithNulls', () {
+    HeroModel hero = HeroModel(1, 'Nisse', null, null, null, null, null, null);
+    String expectedJson = '{"id":"1","name":"Nisse"}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithEmptySubObjects', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, null, null, null, null, null),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithAlignment', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, null, null, null, null, Biography.bad),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{"alignment":"${Biography.bad}"},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithEmptyAliases', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, [], null, null, null, null),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{"aliases":[]},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithOneAliases', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, ['dude'], null, null, null, null),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{"aliases":["dude"]},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
+  test('heroWithTwoAliases', () {
+    HeroModel hero = HeroModel(1, 'Nisse',
+        Powerstats(null, null, null, null, null, null),
+        Biography(null, null, ['dude', 'sucker'], null, null, null, null),
+        Appearance(null, null, null, null, null, null),
+        Work(null, null),
+        Connections(null, null),
+        Image(null));
+    String expectedJson = '{"id":"1","name":"Nisse","powerstats":{},"biography":{"aliases":["dude","sucker"]},"appearance":{},"work":{},"connections":{},"image":{}}';
+    verifyHero(hero, expectedJson);
+  });
+
   test('HeroModel', () {
-    String json =
-    '''
-    {
-      "response": "success",
-      "id": "70",
-      "name": "Batman",
-      "powerstats": {
-        "intelligence": "100",
-        "strength": "26",
-        "speed": "27",
-        "durability": "50",
-        "power": "47",
-        "combat": "100"
-      },
-      "biography": {
-        "full-name": "Bruce Wayne",
-        "alter-egos": "No alter egos found.",
-        "aliases":[
-          "Insider",
-          "Matches Malone"
-        ],
-        "place-of-birth": "Crest Hill, Bristol Township; Gotham County",
-        "first-appearance": "Detective Comics #27",
-        "publisher": "DC Comics",
-        "alignment": "good"
-      },
-      "appearance": {
-        "gender": "Male",
-        "race": "Human",
-        "height": [
-          "6'2",
-          "188 cm"
-        ],
-        "weight": [
-          "210 lb",
-          "95 kg"
-        ],
-        "eye-color": "blue",
-        "hair-color": "black"
-      },
-      "work": {
-        "occupation": "Businessman",
-        "base": "Batcave, Stately Wayne Manor, Gotham City; Hall of Justice, Justice League Watchtower"
-      },
-      "connections": {
-        "group-affiliation": "Batman Family, Batman Incorporated, Justice League, Outsiders, Wayne Enterprises, Club of Heroes, formerly White Lantern Corps, Sinestro Corps",
-        "relatives": "Damian Wayne (son), Dick Grayson (adopted son), Tim Drake (adopted son), Jason Todd (adopted son), Cassandra Cain (adopted ward) Martha Wayne (mother, deceased)"
-      },
-      "image": {
-        "url": "https://www.superherodb.com/pictures2/portraits/10/100/639.jpg"
-      }
-    }
-    ''';
+    String json = TestHeros.Batman;
 
     HeroModel parsed = HeroModel.fromJsonString(json);
 
@@ -78,12 +94,12 @@ void main() {
 
     Powerstats parsed = Powerstats.fromJsonString(json);
 
-    expect(parsed.intelligence, 100);
-    expect(parsed.strength, 26);
-    expect(parsed.speed, 27);
-    expect(parsed.durability, 50);
-    expect(parsed.power, 47);
-    expect(parsed.combat, 100);
+    expect(parsed.intelligence, "100");
+    expect(parsed.strength, "26");
+    expect(parsed.speed, "27");
+    expect(parsed.durability, "50");
+    expect(parsed.power, "47");
+    expect(parsed.combat, "100");
 
     verifyJson(parsed.toJsonString(), json);
   });
@@ -217,6 +233,13 @@ void verifyJson(String actual, String expected) {
   String expectedClean = expected.replaceAll(RegExp(r'\s+'), '');
   String actualClean = actual.replaceAll(RegExp(r'\s+'), '');
   expect(actualClean, expectedClean);
+}
+
+void verifyHero(HeroModel hero, String expectedJson) {
+  String actualJson = hero.toJsonString();
+  verifyJson(actualJson, expectedJson);
+  String fromJsonString = HeroModel.fromJsonString(expectedJson).toJsonString();
+  verifyJson(fromJsonString, expectedJson);
 }
 
 HeroModel getNext(Iterator<HeroModel> heroesIterator) {

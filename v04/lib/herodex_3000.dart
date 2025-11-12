@@ -1,56 +1,64 @@
 import 'dart:io';
 
-import 'managers/hero_data_manager.dart';
-import 'managers/hero_data_managing.dart';
-import 'models/hero_model.dart';
-import 'util.dart';
+import 'package:v04/managers/hero_data_managing.dart';
+import 'package:v04/models/hero_model.dart';
+import 'package:v04/util.dart';
 
 class HeroDex3000 {
 
-  int nrOfTopHeroes = 3;
-  HeroDataManaging heroes = HeroDataManager(); // ToDo
+  int _nrOfTopHeroes = 3;
+  final HeroDataManaging _heroes;
 
-  void run() {
-    bool continueRunning;
+  HeroDex3000(this._heroes);
+
+  Future<void> run() async {
+    int highestId = _heroes.loadHeroes();
+    HeroModel.idFactory.setIdCounterIfHigher(highestId);
+    bool continueRunning = true;
 
     do {
-      printAlternatives();
-      continueRunning = processAlternatives();
+      try {
+        printAlternatives();
+        continueRunning = await processAlternatives();
+      } catch (e) {
+        print("\n*** Error in execution ***");
+        print(e);
+      }
     } while (continueRunning);
   }
 
   void printAlternatives() {
     print("\n-- Alternativs ---\n");
-    print("1. Add Hero.");
-    print("2. List Heroes.");
-    print("3. List top $nrOfTopHeroes Heroes.");
-    print("4. Set nr of top Heroes list.");
-    print("5. Search Heroes.");
-    print("6. Load Heroes.");
-    print("7. Save Heroes.");
-    print("8. Exit.");
+
+    for (Alternative alternative in Alternative.values) {
+      print(alternative.getLabel());
+    }
   }
 
-  bool processAlternatives() {
+  Future<bool> processAlternatives() async {
     Alternative alt = selectAlternative();
 
     switch (alt) {
       case Alternative.add: addHero();
+      case Alternative.printHero: printHero();
+      case Alternative.delete: deleteHero();
+      case Alternative.deleteAll: deleteAllHeroes();
       case Alternative.list: listHeroes();
+      case Alternative.listGood: listGoodHeroes();
+      case Alternative.listBad: listBadHeroes();
       case Alternative.listTop: listTopHeroes();
       case Alternative.setTopList: setNrOfTopHeroesList();
       case Alternative.search: searchHeroes();
-      case Alternative.load: loadHeroes();
-      case Alternative.save: saveHeroes();
-      case Alternative.exit: return false;
+      case Alternative.remoteSearchAndLoad: await remoteSearchAndLoadHeroes();
+      case Alternative.exit: return Future.value(false);
     }
 
-    return true;
+    return Future.value(true);
   }
 
   Alternative selectAlternative() {
     while (true) {
-      print("\nChoice: ");
+      stdout.write("\nChoice: ");
       String? readArg = stdin.readLineSync();
 
       if (readArg != null) {
@@ -66,48 +74,92 @@ class HeroDex3000 {
   }
 
   void addHero() {
-    print("");
+    print("\n-- Add Hero --");
     String name = Util.readString("Name: ");
     int strength = Util.readPositiveInt("Strength: ");
-    String alignment = Util.readSpecificString("Alignment(good/bad): ", ["good", "bad"]);
+    String alignment = Util.readSpecificString("Alignment(${Biography.good}/${Biography.bad}): ", [Biography.good, Biography.bad]);
     HeroModel hero = HeroModel.simpelHeroModel(name, strength, alignment);
-    heroes.add(hero);
+    _heroes.add(hero);
+  }
+
+  void printHero() {
+    print("\n-- Print Hero --");
+    int id = Util.readPositiveInt("Id: ");
+    HeroModel? hero = _heroes.getHero(id);
+
+    if (hero == null) {
+      print("\nNo hero for id: $id found");
+    } else {
+      hero.prettyPrintHero();
+    }
+  }
+
+  void deleteHero() {
+    print("\n-- Delete Hero --");
+    int id = Util.readPositiveInt("Id: ");
+    _heroes.deleteHero(id);
+  }
+
+  void deleteAllHeroes() {
+    print("\n-- Delete all Heroes --");
+    _heroes.deleteAllHeroes();
   }
 
   void listHeroes() {
     print("\n-- List Heroes --");
-    printHeroes(heroes.getHeroList());
+    List<HeroModel> heroes = _heroes.getHeroes();
+    printHeroes(heroes);
+    print("\n${heroes.length} Heroes found.");
+  }
+
+  void listGoodHeroes() {
+    print("\n-- List Good Heroes --");
+    List<HeroModel> heroes = _heroes.getGoodHeroes();
+    printHeroes(heroes);
+    print("\n${heroes.length} Good Heroes found.");
+  }
+
+  void listBadHeroes() {
+    print("\n-- List Bad Heroes --");
+    List<HeroModel> heroes = _heroes.getBadHeroes();
+    printHeroes(heroes);
+    print("\n${heroes.length} Bad Heroes found.");
   }
 
   void listTopHeroes() {
-    print("\n-- List Top $nrOfTopHeroes Heroes --");
-    printHeroes(heroes.getTopHeroes(nrOfTopHeroes));
+    print("\n-- List Top $_nrOfTopHeroes Heroes --");
+    printHeroes(_heroes.getTopHeroes(_nrOfTopHeroes));
   }
 
   void setNrOfTopHeroesList() {
     print("\n-- Set nr of top heroes List --\n");
-    nrOfTopHeroes = Util.readPositiveIntWithMinValue("NrOfTopHeroes: ", 1);
+    _nrOfTopHeroes = Util.readPositiveIntWithMinValue("NrOfTopHeroes: ", 1);
   }
 
   void searchHeroes() {
     print("\n-- Search Heroes --");
     String search = Util.readString("\nSearch: ");
-    List<HeroModel> searchResult = heroes.searchHero(search);
+    List<HeroModel> heroes = _heroes.searchHero(search);
 
-    if (searchResult.isEmpty) {
+    if (heroes.isEmpty) {
       print("\nNo Heroes found.");
     } else {
-      printHeroes(searchResult);
+      printHeroes(heroes);
+      print("\n${heroes.length} Heroes found.");
     }
   }
 
-  void loadHeroes() {
-    print("Load ..");
-    heroes.loadHero();
-  }
+  Future<void> remoteSearchAndLoadHeroes() async {
+    print("\n-- Remote Search and load Heroes --");
+    String search = Util.readString("\nSearch: ");
+    List<HeroModel> searchResult = await _heroes.remoteSearchAndLoadHeroes(search);
 
-  void saveHeroes() {
-    heroes.saveHero();
+    if (searchResult.isEmpty) {
+      print("\nNo new Heroes found.");
+    } else {
+      printHeroes(searchResult);
+      print("\n${searchResult.length} Heroes found and added to local herodex.");
+    }
   }
 
   static void printHeroes(List<HeroModel> heroesList) {
@@ -119,7 +171,30 @@ class HeroDex3000 {
 
 enum Alternative {
 
-  add, list, listTop, setTopList, search, load, save, exit;
+  add('Add Hero'),
+  printHero('Print Hero'),
+  delete('Delete Hero'),
+  deleteAll('Delete All Heroes'),
+  list('List Heroes'),
+  listGood('List Good Heroes'),
+  listBad('List Bad Heroes'),
+  listTop('List top Heroes'),
+  setTopList('Set nr of top Heroes list'),
+  search('Search Heroes'),
+  remoteSearchAndLoad('Search and load Heroes'),
+  exit('Exit');
+
+  final String label;
+
+  const Alternative(this.label);
+
+  String getLabel() {
+    return '${_getIndentation()}${index + 1}. $label.';
+  }
+
+  String _getIndentation() {
+    return index < 9 ? ' ' : '';
+  }
 
   static Alternative decode(int alternativeId) {
     return Alternative.values[alternativeId - 1];

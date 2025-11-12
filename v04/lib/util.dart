@@ -4,10 +4,10 @@ class Util {
 
   static String readString(String inputLabel) {
     while (true) {
-      print(inputLabel);
+      stdout.write(inputLabel);
       String? readArg = stdin.readLineSync();
 
-      if (readArg != null && readArg.trim().length != 0) {
+      if (readArg != null && readArg.trim().isNotEmpty) {
         return readArg.trim();
       }
 
@@ -16,7 +16,7 @@ class Util {
   }
 
   static String? readOptionalString(String inputLabel) {
-    print(inputLabel);
+    stdout.write(inputLabel);
     String? readArg = stdin.readLineSync();
 
     if (readArg != null && readArg.trim().isNotEmpty) {
@@ -28,10 +28,10 @@ class Util {
 
   static String readSpecificString(String inputLabel, List<String> possibleChoices) {
     while (true) {
-      print(inputLabel);
+      stdout.write(inputLabel);
       String? readArg = stdin.readLineSync();
 
-      if (readArg != null && readArg.trim().length != 0) {
+      if (readArg != null && readArg.trim().isNotEmpty) {
         String arg = readArg.trim();
 
         if (possibleChoices.contains(arg)) {
@@ -49,7 +49,7 @@ class Util {
 
   static int readPositiveIntWithMinValue(String inputLabel, int minValue) {
     while (true) {
-      print(inputLabel);
+      stdout.write(inputLabel);
       String? readArg = stdin.readLineSync();
 
       if (readArg != null) {

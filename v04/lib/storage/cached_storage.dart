@@ -1,12 +1,12 @@
 import 'package:v04/models/hero_model.dart';
 
-abstract class HeroDataManaging {
+abstract class CachedStorage {
 
   void add(HeroModel hero);
 
-  int loadHeroes();
+  void addAll(List<HeroModel> heroes);
 
-  void saveHeroes();
+  bool isHeroPresent(int id);
 
   void deleteHero(int id);
 
@@ -16,13 +16,13 @@ abstract class HeroDataManaging {
 
   List<HeroModel> getHeroes();
 
-  List<HeroModel> getGoodHeroes();
-
-  List<HeroModel> getBadHeroes();
-
   List<HeroModel> getTopHeroes(int nrOfTopHeroes);
 
   List<HeroModel> searchHero(String search);
 
-  Future<List<HeroModel>> remoteSearchAndLoadHeroes(String search);
+  List<HeroModel> getGoodHeroes();
+
+  List<HeroModel> getBadHeroes();
+
+  int getHighestId();
 }
